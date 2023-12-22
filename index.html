@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@1.9.9"
+    integrity="sha384-QFjmbokDn2DjBjq+fM+8LUIVrAgqcNW2s0PjAxHETgRn9l4fvX31ZxDxvwQnyMOX"
+    crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+  <script defer>
+    htmx.logger = function (elt, event, data) {
+      if (console) {
+        // console.log(event, elt, data);
+      }
+    };
+  </script>
+</head>
+
+<!-- https://codepen.io/robstinson/pen/oNLaLMN -->
+
+<body class="flex flex-col items-center justify-center w-screen min-h-screen bg-gray-100 text-gray-800 p-10">
+  <div class="flex flex-col flex-grow w-full max-w-xl bg-white shadow-xl rounded-lg overflow-hidden" hx-ext="ws"
+    ws-connect="/ws">
+    {{ block "chat-list" .}}
+    <div class="flex flex-col flex-grow h-0 p-4 overflow-auto" id="chat" hx-swap-oob="beforeend">
+      {{ if not (eq . nil) }}
+      {{ if eq .Message.Role "assistant" }}
+      <div class="flex w-full mt-2 space-x-3 max-w-xs">
+        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300">
+          <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Leo" />
+        </div>
+        <div>
+          <div class="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
+            <p class="text-sm" id="{{.Message.ID}}">
+              {{.Message.Content}}
+            </p>
+          </div>
+          <span class="text-xs text-gray-500 leading-none">{{.CreatedAt}}</span>
+        </div>
+      </div>
+      {{else}}
+      <div class="flex w-full mt-2 space-x-3 max-w-xs ml-auto justify-end">
+        <div>
+          <div class="bg-blue-600 text-white p-3 rounded-l-lg rounded-br-lg">
+            <p class="text-sm">{{.Message.Content}}</p>
+          </div>
+          <span class="text-xs text-gray-500 leading-none">{{.CreatedAt}}</span>
+        </div>
+        <div class="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300">
+          <img src="https://api.dicebear.com/7.x/adventurer-neutral/svg?seed=Buddy" />
+        </div>
+      </div>
+      {{ end }}
+      {{ end }}
+    </div>
+    {{ end }}
+
+    <form class="bg-gray-300 p-4" id="chatform" hx-target="#chat" hx-swap="beforeend" hx-indicator="#spinner"
+      hx-on:submit="this.reset()" ws-send>
+      <input class=" flex items-center h-10 w-full rounded px-3 text-sm" placeholder="Type your message..." type="text"
+        name="user-message" id="user-message" class="form-control" />
+    </form>
+  </div>
+</body>
+
+</html>
